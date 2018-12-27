@@ -1,21 +1,21 @@
 class Character:
-    def __init__(self, name, inventory, x, y, img):
+    def __init__(self, id, name, health, dmg, inventory, x, y, img):
+        self.id = id
         self.name = name
+        self.base_health = health
+        self.base_dmg = dmg
         self.inventory = inventory
         self.x = x
         self.y = y
         self.img = img
+        self.health = health
 
-    # def move(self, dx, dy):
-    #     if (self.x + dx) <= 0 or (self.x + dx) >= DISPLAY_W:
-    #         dx = 0
-    #     if (self.y + dy) <= 0 or (self.y + dy) >= DISPLAY_H:
-    #         dy = 0
-    #     self.x += dx
-    #     self.y += dy
+    def get_attack(self):
+        return self.base_dmg + self.inventory.get_attack()
 
-    def give_item(self, item):
-        self.inventory.add(item)
+
+    def take_item(self, item):
+        return self.inventory.add(item)
 
     def drop_item(self, item):
         self.inventory.remove(item)

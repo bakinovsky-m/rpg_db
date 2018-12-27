@@ -1,6 +1,4 @@
-import pygame
-
-from item import Item
+import random
 
 class Map:
     def __init__(self, w, h):
@@ -9,13 +7,19 @@ class Map:
 
         self.cells = []
 
-        for _ in range(w + h):
-            self.cells.append(Item('none'))
+        for _ in range(w * h):
+            self.cells.append(0)
 
-        self.__random_fill()
-
-    def __random_fill(self):
-        self.cells[901] = Item('sword', 1, 0, pygame.image.load('assets/sword.png'))
+    def random_fill(self, monsters):
+        for m in monsters:
+            rand_w = (random.randint(0, self.w) // 10) * 10
+            rand_h = (random.randint(0, self.h) // 10) * 10
+            while self.cells[rand_h * self.w + rand_w] != 0:
+                rand_w = (random.randint(0, self.w) // 10) * 10
+                rand_h = (random.randint(0, self.h) // 10) * 10
+            self.cells[rand_h * self.w + rand_w] = m
+            m.x = rand_w
+            m.y = rand_h
 
     def print(self):
         for i in range(self.w):
@@ -31,4 +35,4 @@ class Map:
         self.n += 1
         if self.n >= len(self.cells):
             raise StopIteration
-        return self.n, self.cells[self.n]
+        return self.n - 1, self.cells[self.n - 1]
