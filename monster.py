@@ -9,6 +9,3 @@ class Monster:
         self.y = y
         self.img = img
         self.health = health
-
-    def drop_item(self):
-        return self.item

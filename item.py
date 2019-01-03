@@ -10,6 +10,8 @@ class Item:
         self.asset = asset
         if asset != None:
             self.img = pygame.image.load(asset)
+        self.x = -1
+        self.y = -1
 
     def get_value(self):
         return self.attack + self.defense + self.hp

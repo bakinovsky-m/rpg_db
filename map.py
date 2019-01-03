@@ -1,25 +1,38 @@
 import random
+import math
+
+from constants import TILE_SIZE
 
 class Map:
     def __init__(self, w, h):
-        self.w = w
-        self.h = h
+        self.w = math.floor((w / TILE_SIZE))
+        self.h = math.floor((h / TILE_SIZE))
 
         self.cells = []
 
-        for _ in range(w * h):
+        for _ in range(self.w * self.h):
             self.cells.append(0)
 
-    def random_fill(self, monsters):
+    def random_fill(self, monsters, intensity):
         for m in monsters:
-            rand_w = (random.randint(0, self.w) // 10) * 10
-            rand_h = (random.randint(0, self.h) // 10) * 10
-            while self.cells[rand_h * self.w + rand_w] != 0:
-                rand_w = (random.randint(0, self.w) // 10) * 10
-                rand_h = (random.randint(0, self.h) // 10) * 10
-            self.cells[rand_h * self.w + rand_w] = m
-            m.x = rand_w
-            m.y = rand_h
+            rand_x = random.randint(0, self.w - 1)
+            rand_y = random.randint(0, self.h - 1)
+            print("self.w * self.h", self.w * self.h)
+            print("rand_y * self.w + rand_x", rand_y * self.w + rand_x)
+            while self.cells[rand_y * self.w + rand_x] != 0:
+                rand_x = random.randint(0, self.w - 1)
+                rand_y = random.randint(0, self.h - 1)
+                print("rand_y * self.w + rand_x", rand_y * self.w + rand_x)
+            self.cells[rand_y * self.w + rand_x] = m
+            m.x = rand_x
+            m.y = rand_y
+
+    def is_ok_move(self, char, dx, dy):
+        if ((char.x + dx) < 0) or ((char.x + dx) >= self.w):
+            return False
+        if ((char.y + dy) < 0) or ((char.y + dy) >= self.h):
+            return False
+        return True
 
     def print(self):
         for i in range(self.w):
