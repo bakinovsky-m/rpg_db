@@ -14,10 +14,11 @@ class Inventory:
         res = self.db.select(q)
         for i in res:
             t = Table('items')
-            q = Query.from_(t).select('*').where(t.id == i[0]).get_sql()
+            q = Query.from_(t).select('*').where(t.id == i[1]).get_sql()
             r = self.db.select(q)
             # id name dmg hp  block asset
             r = r[0]
+            print(r[0], r[1], r[5], r[2], r[4], r[3])
             self.items.append(Item(r[0], r[1], r[5], r[2], r[4], r[3]))
 
 
@@ -40,7 +41,8 @@ class Inventory:
 
     def remove(self, item):
         self.size -= 1
-        self.items = [it for it in self.items if it.name != item.name]
+        # self.items = [it for it in self.items if it.name != item.name]
+        self.items = [it for it in self.items if it != item]
         t = Table('items_in_inventory')
         q = Query.from_(t).delete().where(t.inv == self.id).where(t.item == item.id).get_sql()
         self.db.update(q)
