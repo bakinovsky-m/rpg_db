@@ -59,7 +59,7 @@ CREATE TABLE items (
 INSERT INTO items(name, dmg, hp, block, asset) values ('Iron dagger', 2, 0, 0, 'assets/dagger.png');
 INSERT INTO items(name, dmg, hp, block, asset) values ('Wooden shield', 0, 0, 1, 'assets/wooden_shield.png');
 INSERT INTO items(name, dmg, hp, block, asset) values ('Sladkiy rulet', 0, 3, 0, 'assets/sl_rulet.png');
-INSERT INTO items(name, dmg, hp, block, asset) values ('ArrowInAKnee', 3, 0, 0, 'assets/dagger.png');
+INSERT INTO items(name, dmg, hp, block, asset) values ('ArrowInAKnee', 3, 0, 0, 'assets/arrowinaknee.png');
 
 CREATE TABLE monsters (
     id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
