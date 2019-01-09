@@ -20,14 +20,14 @@ INSERT INTO locations(name, x_coord, y_coord) VALUES ('Los Santos', 1, 1);
 
 CREATE TABLE inventories (
     id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-    capacity int,
-    size int
+    capacity INT,
+    size INT DEFAULT 0
 );
 
-INSERT INTO inventories(capacity, size) VALUES (3, 0);
-INSERT INTO inventories(capacity, size) VALUES (3, 0);
-INSERT INTO inventories(capacity, size) VALUES (3, 0);
-INSERT INTO inventories(capacity, size) VALUES (3, 0);
+INSERT INTO inventories(capacity) VALUES (3);
+INSERT INTO inventories(capacity) VALUES (3);
+INSERT INTO inventories(capacity) VALUES (3);
+INSERT INTO inventories(capacity) VALUES (3);
 
 CREATE TABLE characters (
     id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
