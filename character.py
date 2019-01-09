@@ -11,6 +11,7 @@ class Character:
         self.curr_health = self.get_total_health()
         self.lvl = lvl
         self.exp = exp
+        self.regeneration = 1
 
     def get_attack(self):
         return self.base_dmg + self.inventory.get_attack()

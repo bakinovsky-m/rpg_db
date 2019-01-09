@@ -180,6 +180,9 @@ def main():
                         move(hero, mapp, -1, 0)
                     if e.key == pygame.K_RIGHT:
                         move(hero, mapp, 1, 0)
+
+                    hero.regenerate()
+
                 else:
                     global CUR_ITEM
                     if e.key == pygame.K_UP:
