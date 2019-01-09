@@ -24,16 +24,16 @@ def move(char, mmap, dx, dy):
         if isinstance(mmmap, Monster):
             monst = mmmap
             print('before fight')
-            print('char health', char.health)
+            print('char health', char.curr_health)
             print('monst health', monst.health)
-            char.health -= monst.base_dmg - char.inventory.get_block()
+            char.curr_health -= monst.base_dmg - char.inventory.get_block()
             monst.health -= char.get_attack()
             if monst.health <= 0:
                 mmap.cells[index] = monst.item
                 monst.item.x = monst.x
                 monst.item.y = monst.y
             print('after fight')
-            print('char health', char.health)
+            print('char health', char.curr_health)
             print('monst health', monst.health)
         elif isinstance(mmmap, Item):
             if char.take_item(mmmap):
@@ -55,7 +55,12 @@ def draw_UI(screen, hero, in_inventory_mode):
     INFO_BAR.append(f.render(hero.name, False, TEXT_COLOR))
     s = 'lvl: ' + str(hero.lvl) + '  exp: ' + str(hero.exp)
     INFO_BAR.append(f.render(s, False, TEXT_COLOR))
-    INFO_BAR.append(f.render('hp: ' + str(hero.health), False, TEXT_COLOR))
+    s = 'hp: ' + str(hero.curr_health) + '/' + str(hero.get_total_health()) + '(+' + str(hero.inventory.get_health()) + ')' + ' reg:' + str(hero.regeneration)
+    INFO_BAR.append(f.render(s, False, TEXT_COLOR))
+    s = 'dmg: ' + str(hero.base_dmg) + '(+' + str(hero.inventory.get_attack()) + ')'
+    INFO_BAR.append(f.render(s, False, TEXT_COLOR))
+    s = 'blk: ' + str(hero.get_block())
+    INFO_BAR.append(f.render(s, False, TEXT_COLOR))
 
     i = 0
     for a in INFO_BAR:
@@ -75,7 +80,7 @@ def draw_UI(screen, hero, in_inventory_mode):
     INV_BAR = []
 
     for it in hero.inventory.items:
-        INV_BAR.append(f.render(it.name, False, TEXT_COLOR))
+        INV_BAR.append(f.render(it.name + ' (a:' + str(it.attack) + ',b:' + str(it.defense) + ',h:' + str(it.hp) + ')', False, TEXT_COLOR))
 
     cur_item = 0
     for a in INV_BAR:
