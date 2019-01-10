@@ -1,5 +1,5 @@
 class Character:
-    def __init__(self, id, name, lvl, exp, health, dmg, inventory, x, y, img):
+    def __init__(self, id, name, lvl, exp, health, dmg, inventory, x, y, location, img):
         self.id = id
         self.name = name
         self.base_health = health
@@ -12,6 +12,7 @@ class Character:
         self.lvl = lvl
         self.exp = exp
         self.regeneration = 1
+        self.curr_location = location
 
     def get_attack(self):
         return self.base_dmg + self.inventory.get_attack()

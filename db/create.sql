@@ -10,13 +10,14 @@ CREATE TABLE locations (
     id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     name VARCHAR(25) NOT NULL,
     x_coord INT NOT NULL,
-    y_coord INT NOT NULL
+    y_coord INT NOT NULL,
+    hex_color VARCHAR(7)
 );
 
-INSERT INTO locations(name, x_coord, y_coord) VALUES ('Skyrim', 0, 0);
-INSERT INTO locations(name, x_coord, y_coord) VALUES ('Morrowind', 1, 0);
-INSERT INTO locations(name, x_coord, y_coord) VALUES ('Oblivion', 0, 1);
-INSERT INTO locations(name, x_coord, y_coord) VALUES ('Los Santos', 1, 1);
+INSERT INTO locations(name, x_coord, y_coord, hex_color) VALUES ('Skyrim', 0, 0, '#82b5e8');
+INSERT INTO locations(name, x_coord, y_coord, hex_color) VALUES ('Morrowind', 1, 0, '#e8b792');
+INSERT INTO locations(name, x_coord, y_coord, hex_color) VALUES ('Oblivion', 0, 1, '#0a672a');
+INSERT INTO locations(name, x_coord, y_coord, hex_color) VALUES ('Los Santos', 1, 1, '#8d1c64');
 
 CREATE TABLE inventories (
     id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,

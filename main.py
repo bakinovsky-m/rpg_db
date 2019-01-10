@@ -7,12 +7,16 @@ from inventory import Inventory
 from db_handler import DBHandler
 from item import Item
 from map import Map
+from location import Location
 
 # from constants import DISPLAY_H, DISPLAY_W, BACKGROUND_COLOR, TILE_SIZE, FPS, MAP_H, MAP_W, INVENTORY_COLOR, TEXT_COLOR
 from constants import *
+import constants
 
 INV_H = 0
 CUR_ITEM = 0
+
+LOCATIONS = []
 
 def move(char, mmap, dx, dy):
     if not mmap.is_ok_move(char, dx, dy):
@@ -92,6 +96,15 @@ def draw_UI(screen, hero, in_inventory_mode):
         i += 1
         cur_item += 1
 
+def init_locations(db_handler):
+    t = pypika.Table('locations')
+    q = pypika.Query.from_(t).select('*').get_sql()
+
+    response = db_handler.select(q)
+
+    for r in response:
+        LOCATIONS.append(Location(r[0], r[1], r[2], r[3], r[4]))
+
 def make_pygame_image(path):
     return pygame.transform.scale(pygame.image.load(path), (TILE_SIZE, TILE_SIZE))
 
@@ -112,12 +125,14 @@ def main():
         print('no such character')
         return
 
+    # INVENTORY
     t = pypika.Table('inventories')
     q = pypika.Query.from_(t).select('*').where(t.id == hero_res[7]).get_sql()
     # id capacity size
     inv_res = db.select(q)[0]
     heros_inv = Inventory(inv_res[0], inv_res[1], inv_res[2], db)
 
+    # MONSTERS
     t = pypika.Table('monsters')
     q = pypika.Query.from_(t).select('*').get_sql()
     monster_res = db.select(q)
@@ -129,6 +144,9 @@ def main():
         rrr = db.select(q)[0]
         item_to_monst = Item(rrr[0], rrr[1], make_pygame_image(rrr[5]), rrr[2], rrr[4], rrr[3])
         monsters.append(Monster(mr[0], mr[1], mr[3], mr[4], item_to_monst, 0, 0, make_pygame_image(mr[7])))
+
+    # LOCATIONS
+    init_locations(db)
 
     # PYGAME
     pygame.init()
@@ -142,6 +160,11 @@ def main():
 
     hero = Character(hero_res[0], hero_name, hero_res[2], hero_res[3], hero_res[4], hero_res[5], heros_inv, round(mapp.w/2), round(mapp.h/2), hero_res[6], make_pygame_image("assets/new_hero.png"))
 
+    for l in LOCATIONS:
+        if l.id == hero.curr_location:
+            print('qwe', l.rgb)
+            constants.BACKGROUND_COLOR = l.rgb
+
     # for it in hero.inventory.items:
         # print(hex(id(it)))
 
@@ -149,7 +172,7 @@ def main():
     inventory_surf.fill(INVENTORY_COLOR)
 
     in_inventory_mode = False
-    screen.fill(BACKGROUND_COLOR)
+    screen.fill(constants.BACKGROUND_COLOR)
     for i, it in mapp:
         if it != 0:
             screen.blit(it.img, (it.x * TILE_SIZE, it.y * TILE_SIZE))
@@ -197,7 +220,7 @@ def main():
                         hero.drop_item(hero.inventory.items[CUR_ITEM])
                         print(len(hero.inventory.items))
 
-                screen.fill(BACKGROUND_COLOR)
+                screen.fill(constants.BACKGROUND_COLOR)
                 for i, it in mapp:
                     if it != 0:
                         screen.blit(it.img, (it.x * TILE_SIZE, it.y * TILE_SIZE))
