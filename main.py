@@ -92,6 +92,8 @@ def draw_UI(screen, hero, in_inventory_mode):
         i += 1
         cur_item += 1
 
+def make_pygame_image(path):
+    return pygame.transform.scale(pygame.image.load(path), (TILE_SIZE, TILE_SIZE))
 
 def main():
     # INIT
@@ -125,8 +127,8 @@ def main():
         t = pypika.Table('items')
         q = pypika.Query.from_(t).select('*').where(t.id == mr[6]).get_sql()
         rrr = db.select(q)[0]
-        item_to_monst = Item(rrr[0], rrr[1], rrr[5], rrr[2], rrr[4], rrr[3])
-        monsters.append(Monster(mr[0], mr[1], mr[3], mr[4], item_to_monst, 0, 0, pygame.image.load(mr[7])))
+        item_to_monst = Item(rrr[0], rrr[1], make_pygame_image(rrr[5]), rrr[2], rrr[4], rrr[3])
+        monsters.append(Monster(mr[0], mr[1], mr[3], mr[4], item_to_monst, 0, 0, make_pygame_image(mr[7])))
 
     # PYGAME
     pygame.init()
@@ -138,7 +140,7 @@ def main():
     mapp = Map(MAP_W, MAP_H)
     mapp.random_fill(monsters, 2)
 
-    hero = Character(hero_res[0], hero_name, hero_res[2], hero_res[3], hero_res[4], hero_res[5], heros_inv, 0, 0, pygame.image.load("assets/new_hero.png"))
+    hero = Character(hero_res[0], hero_name, hero_res[2], hero_res[3], hero_res[4], hero_res[5], heros_inv, round(mapp.w/2), round(mapp.h/2), hero_res[6], make_pygame_image("assets/new_hero.png"))
 
     # for it in hero.inventory.items:
         # print(hex(id(it)))
