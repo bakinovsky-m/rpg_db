@@ -293,7 +293,16 @@ def main():
                 for i, it in mapp:
                     if it != 0:
                         screen.blit(it.img, (it.x * TILE_SIZE, it.y * TILE_SIZE))
+                        if isinstance(it, Monster):
+                            health_bar = pygame.Surface((TILE_SIZE * (it.health / it.base_health), int(TILE_SIZE/10)))
+                            health_bar.fill(hex_to_rgb('#00FF00'))
+                            screen.blit(health_bar, (it.x * TILE_SIZE, (it.y * TILE_SIZE)))
+
+                health_bar = pygame.Surface((TILE_SIZE * (hero.curr_health / hero.get_total_health()), int(TILE_SIZE/10)))
+                health_bar.fill(hex_to_rgb('#00FF00'))
+                screen.blit(health_bar, (hero.x * TILE_SIZE, (hero.y *TILE_SIZE) - 10))
                 screen.blit(hero.img, (hero.x * TILE_SIZE, hero.y * TILE_SIZE))
+
                 screen.blit(inventory_surf, (MAP_W,0))
                 draw_UI(screen, hero, in_inventory_mode)
                 pygame.display.update()

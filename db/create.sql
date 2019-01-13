@@ -91,9 +91,9 @@ CREATE TABLE monsters (
 );
 
 INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset) values ('Rat', 1, 5, 2, 1, 1, 'assets/rat.png');
-INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset) values ('Wolf', 1, 5, 2, 1, 2, 'assets/wolf.png');
-INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset) values ('Draugr', 1, 5, 2, 1, 3, 'assets/rat.png');
-INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset) values ('Dragon', 1, 5, 3, 1, 4, 'assets/rat.png');
+INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset) values ('Wolf', 1, 7, 2, 1, 2, 'assets/wolf.png');
+INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset) values ('Draugr', 1, 10, 2, 1, 3, 'assets/rat.png');
+INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset) values ('Dragon', 1, 15, 3, 1, 4, 'assets/rat.png');
 
 CREATE TABLE items_in_inventory (
     inv int,
