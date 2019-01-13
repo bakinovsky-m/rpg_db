@@ -1,5 +1,6 @@
 import pygame
 import pypika
+from pypika import Order
 
 from character import Character
 from monster import Monster
@@ -103,23 +104,98 @@ def init_locations(db_handler):
 def make_pygame_image(path):
     return pygame.transform.scale(pygame.image.load(path), (TILE_SIZE, TILE_SIZE))
 
+def start_menu(db):
+    print('1. Choose existing character')
+    print('2. Create new character')
+    print('3. List existing characters')
+    available_anses = [1,2,3]
+    ans = input('> ')
+    try:
+        ans = int(ans)
+        if ans not in available_anses:
+            return -1
+    except ValueError:
+        return -1
+
+    if ans == 1:
+        hero_name = input('hero name: ')
+        t = pypika.Table('characters')
+        q = pypika.Query.from_(t).select('*').where(t.name == hero_name).get_sql()
+        hero_res = db.select(q)
+        try:
+            hero_res = hero_res[0]
+        except IndexError:
+            print('no such character')
+            return -1
+        print('starting your adventure')
+        return hero_res
+    if ans == 2:
+        print()
+        name = input('Name: ')
+        print('Available classes: ')
+        t = pypika.Table('classes')
+        q = pypika.Query.from_(t).select('*').get_sql()
+        class_res = db.select(q)
+        i = 0
+        for r in class_res:
+            print(i+1, r[1] + " (hp: " + str(r[2]) + ", dmg: " + str(r[3]) + ')') 
+            i += 1
+        class_ = input('No. of class: ')
+        class_ = int(class_)
+        class_ -= 1 # for right indexation
+
+        t = pypika.Table('inventories')
+        q = pypika.Query.into('inventories').columns(t.capacity).insert(3).get_sql()
+        db.insert(q)
+
+        q = pypika.Query.from_(t).select('id').orderby('id', order=Order.desc).get_sql()
+        new_inv = db.select(q)[0]
+
+        t = pypika.Table('characters')
+        q = pypika.Query.into(t).columns(
+                t.name,
+                t.base_health,
+                t.base_damage,
+                t.curr_location,
+                t.inventory,
+                t.class_
+            ).insert(
+                name,
+                class_res[class_][2],
+                class_res[class_][3],
+                1,
+                new_inv[0],
+                class_res[class_][0]
+            ).get_sql()
+        db.insert(q)
+
+        q = pypika.Query.from_(t).select("*").where(t.name == name).get_sql()
+        res = db.select(q)[0]
+        print('new character have been created')
+        return res
+
+    if ans == 3:
+        t = pypika.Table('characters')
+        q = pypika.Query.from_(t).select('*').get_sql()
+        res = db.select(q)
+
+        print()
+        for r in res:
+            print(r[1] + ', lvl ' + str(r[2]))
+        print()
+        return -1
+
 def main():
     # INIT
     db = DBHandler()
 
-    print('input the name: ')
-    # hero_name = input()
-    hero_name = 'Dragonborn'
-    t = pypika.Table('characters')
-    q = pypika.Query.from_(t).select('*').where(t.name == hero_name).get_sql()
-    hero_res = db.select(q)
     # id name lvl curr_exp base_health base_damage curr_location inventory 
-    try:
-        hero_res = hero_res[0]
-    except IndexError:
-        print('no such character')
-        return
+    hero_res = start_menu(db)
 
+    while hero_res == -1:
+        hero_res = start_menu(db)
+
+    print(hero_res)
     # INVENTORY
     t = pypika.Table('inventories')
     q = pypika.Query.from_(t).select('*').where(t.id == hero_res[7]).get_sql()
