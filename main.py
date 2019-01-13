@@ -28,18 +28,12 @@ def move(char, mmap, dx, dy):
     if mmmap != 0:
         if isinstance(mmmap, Monster):
             monst = mmmap
-            print('before fight')
-            print('char health', char.curr_health)
-            print('monst health', monst.health)
             char.curr_health -= monst.base_dmg - char.inventory.get_block()
             monst.health -= char.get_attack()
             if monst.health <= 0:
                 mmap.cells[index] = monst.item
                 monst.item.x = monst.x
                 monst.item.y = monst.y
-            print('after fight')
-            print('char health', char.curr_health)
-            print('monst health', monst.health)
         elif isinstance(mmmap, Item):
             if char.take_item(mmmap):
                 mmmap.x = -1

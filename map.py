@@ -17,12 +17,9 @@ class Map:
         for m in monsters:
             rand_x = random.randint(0, self.w - 1)
             rand_y = random.randint(0, self.h - 1)
-            print("self.w * self.h", self.w * self.h)
-            print("rand_y * self.w + rand_x", rand_y * self.w + rand_x)
             while self.cells[rand_y * self.w + rand_x] != 0:
                 rand_x = random.randint(0, self.w - 1)
                 rand_y = random.randint(0, self.h - 1)
-                print("rand_y * self.w + rand_x", rand_y * self.w + rand_x)
             self.cells[rand_y * self.w + rand_x] = m
             m.x = rand_x
             m.y = rand_y
