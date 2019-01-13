@@ -17,6 +17,7 @@ INV_H = 0
 CUR_ITEM = 0
 
 LOCATIONS = []
+CUR_LOCATION = None
 
 def move(char, mmap, dx, dy):
     if not mmap.is_ok_move(char, dx, dy):
@@ -147,6 +148,10 @@ def main():
 
     # LOCATIONS
     init_locations(db)
+    for l in LOCATIONS:
+        if l.id == hero_res[6]:
+            global CUR_LOCATION
+            CUR_LOCATION = l
 
     # PYGAME
     pygame.init()
@@ -158,15 +163,9 @@ def main():
     mapp = Map(MAP_W, MAP_H)
     mapp.random_fill(monsters, 2)
 
-    hero = Character(hero_res[0], hero_name, hero_res[2], hero_res[3], hero_res[4], hero_res[5], heros_inv, round(mapp.w/2), round(mapp.h/2), hero_res[6], make_pygame_image("assets/new_hero.png"))
+    hero = Character(hero_res[0], hero_res[1], hero_res[2], hero_res[3], hero_res[4], hero_res[5], heros_inv, round(mapp.w/2), round(mapp.h/2), CUR_LOCATION, make_pygame_image("assets/new_hero.png"))
 
-    for l in LOCATIONS:
-        if l.id == hero.curr_location:
-            print('qwe', l.rgb)
-            constants.BACKGROUND_COLOR = l.rgb
-
-    # for it in hero.inventory.items:
-        # print(hex(id(it)))
+    constants.BACKGROUND_COLOR = hero.curr_location.rgb
 
     inventory_surf = pygame.Surface((DISPLAY_W - MAP_W, DISPLAY_H))
     inventory_surf.fill(INVENTORY_COLOR)
