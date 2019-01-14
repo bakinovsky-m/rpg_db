@@ -40,6 +40,8 @@ class Character:
     def regenerate(self):
         if self.curr_health < self.get_total_health():
             self.curr_health += self.regeneration
+            if self.curr_health > self.get_total_health():
+                self.curr_health = self.get_total_health()
         if self.curr_mana < self.total_mana:
             self.curr_mana += self.mana_regen
             if self.curr_mana > self.total_mana:
