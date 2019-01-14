@@ -20,9 +20,31 @@ CUR_ITEM = 0
 LOCATIONS = []
 CUR_LOCATION = None
 
+def change_location(char, mmap, dx, dy):
+    cur_x = char.curr_location.x
+    cur_y = char.curr_location.y
+
+    for l in LOCATIONS:
+        if l.x == (cur_x + dx) and l.y == (cur_y + dy):
+            global CUR_LOCATION
+            CUR_LOCATION = l
+            char.curr_location = l
+            constants.BACKGROUND_COLOR = char.curr_location.rgb
+            if dx > 0:
+                char.x = 0
+            elif dx < 0:
+                char.x = mmap.w - 1
+            if dy > 0:
+                char.y = 0
+            elif dy < 0:
+                char.y = mmap.h - 1
+            return True
+
+    return False
+
 def move(char, mmap, dx, dy):
     if not mmap.is_ok_move(char, dx, dy):
-        print('no way')
+        change_location(char, mmap, dx, dy)
         return
     index = (char.x + dx) + (char.y + dy)*mmap.w
     mmmap = mmap.cells[index]
@@ -48,7 +70,7 @@ def draw_UI(screen, hero, in_inventory_mode):
 
     INFO_BAR = []
 
-    INFO_BAR.append(f.render(hero.name, False, TEXT_COLOR))
+    INFO_BAR.append(f.render(hero.name + ", " + hero.curr_location.name, False, TEXT_COLOR))
     s = 'lvl: ' + str(hero.lvl) + '  exp: ' + str(hero.exp)
     INFO_BAR.append(f.render(s, False, TEXT_COLOR))
     s = 'hp: ' + str(hero.curr_health) + '/' + str(hero.get_total_health()) + '(+' + str(hero.inventory.get_health()) + ')' + ' reg:' + str(hero.regeneration)
