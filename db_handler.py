@@ -2,8 +2,8 @@ import mysql.connector
 
 class DBHandler:
     def __init__(self):
-        self.login = 'root'
-        self.password = '1qaz2WSX'
+        self.login = 'rpg_gamer'
+        self.password = 'gamer_pass'
         self.config = {
             'host': 'localhost',
             'port': 3306,

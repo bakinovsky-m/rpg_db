@@ -1,6 +1,6 @@
-GRANT ALL PRIVILEGES ON RPG_DB.* TO admin@localhost IDENTIFIED BY 'admin_pass';
-GRANT SELECT, INSERT, UPDATE, DELETE ON RPG_DB.* to gamer@localhost;
-GRANT SELECT ON RPG_DB.* TO viewer@locahost;
+GRANT ALL PRIVILEGES ON RPG_DB.* TO rpg_admin@localhost IDENTIFIED BY 'admin_pass';
+GRANT SELECT, INSERT, UPDATE, DELETE ON RPG_DB.* to rpg_gamer@localhost IDENTIFIED BY 'gamer_pass';
+GRANT SELECT ON RPG_DB.* TO rpg_viewer@locahost;
 
 DROP DATABASE IF EXISTS RPG_DB;
 CREATE DATABASE RPG_DB;
