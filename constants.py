@@ -7,7 +7,7 @@ BACKGROUND_COLOR = (0, 50, 0)
 INVENTORY_COLOR = (197,180,160)
 TEXT_COLOR = (0,0,0)
 TEXT_SIZE = 30
-TILE_SIZE = 100
+TILE_SIZE = 50
 
 def hex_to_rgb(h):
     h = h.lstrip('#')

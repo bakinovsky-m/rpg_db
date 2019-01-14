@@ -25,10 +25,7 @@ CREATE TABLE inventories (
     size INT DEFAULT 0
 );
 
-INSERT INTO inventories(capacity) VALUES (3);
-INSERT INTO inventories(capacity) VALUES (3);
-INSERT INTO inventories(capacity) VALUES (3);
-INSERT INTO inventories(capacity) VALUES (3);
+INSERT INTO inventories(capacity) VALUES (3); -- for the DRAGONBORN
 
 CREATE TABLE items (
     id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
@@ -73,9 +70,6 @@ CREATE TABLE characters (
 );
 
 INSERT INTO characters (name, lvl, curr_exp, base_health, base_damage, curr_location, inventory, class_) values ('Dragonborn', 1, 0, 10, 10, 1, 1, 3);
--- INSERT INTO characters (name, lvl, curr_exp, base_health, base_damage, curr_location, inventory) values ('Lydia', 1, 0, 10, 1, 1, 2);
--- INSERT INTO characters (name, lvl, curr_exp, base_health, base_damage, curr_location, inventory) values ('The Choosen One', 1, 0, 10, 1, 1, 3);
--- INSERT INTO characters (name, lvl, curr_exp, base_health, base_damage, curr_location, inventory) values ('Anton', 1, 0, 10, 1, 1, 4);
 
 CREATE TABLE monsters (
     id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
@@ -91,7 +85,7 @@ CREATE TABLE monsters (
 );
 
 INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset) values ('Rat', 1, 5, 2, 1, 1, 'assets/rat.png');
-INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset) values ('Wolf', 1, 7, 2, 1, 2, 'assets/wolf.png');
+INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset) values ('Wolf', 1, 7, 20, 1, 2, 'assets/wolf.png');
 INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset) values ('Draugr', 1, 10, 2, 1, 3, 'assets/rat.png');
 INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset) values ('Dragon', 1, 15, 3, 1, 4, 'assets/rat.png');
 
