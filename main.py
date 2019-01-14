@@ -354,8 +354,9 @@ def main():
                 screen.blit(inventory_surf, (MAP_W,0))
                 draw_UI(screen, hero, in_inventory_mode)
                 pygame.display.update()
-    print('Your character is totally dead :(')
-    print('Make another one and good luck!')
+    if hero.curr_health <= 0:
+        print('Your character is totally dead :(')
+        print('Make another one and good luck!')
 
 
 
