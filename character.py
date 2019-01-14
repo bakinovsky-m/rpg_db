@@ -2,16 +2,18 @@ class Character:
     def __init__(self, id, name, lvl, exp, health, dmg, inventory, x, y, location, img):
         self.id = id
         self.name = name
-        self.base_health = health
-        self.base_dmg = dmg
+        self.start_health = health
+        self.start_dmg = dmg
+        self.lvl = lvl
+        self.base_health = self.start_health * self.lvl
+        self.base_dmg = self.start_dmg * self.lvl
         self.inventory = inventory
         self.x = x
         self.y = y
         self.img = img
         self.curr_health = self.get_total_health()
-        self.lvl = lvl
         self.exp = exp
-        self.regeneration = 1
+        self.regeneration = self.lvl
         self.curr_location = location
 
     def get_attack(self):
@@ -32,3 +34,8 @@ class Character:
     def regenerate(self):
         if self.curr_health < self.get_total_health():
             self.curr_health += self.regeneration
+
+    def recalculate_basics(self):
+        self.base_health = self.start_health * self.lvl
+        self.base_dmg = self.start_dmg * self.lvl
+        self.regeneration = self.lvl

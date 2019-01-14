@@ -31,11 +31,11 @@ def create_monsters_list(db):
         q = pypika.Query.from_(t).select('*').where(t.id == mr[6]).get_sql()
         rrr = db.select(q)[0]
         rarity = mr[8]
-        monst_count = (1/rarity) * (MAP_W / TILE_SIZE) * (MAP_H / TILE_SIZE)
+        monst_count = (1/rarity) * (MAP_W / TILE_SIZE) * (MAP_H / TILE_SIZE) / 5
         monst_count = round(monst_count)
         for _ in range(monst_count):
             item_to_monst = Item(rrr[0], rrr[1], make_pygame_image(rrr[5]), rrr[2], rrr[4], rrr[3])
-            monsters.append(Monster(mr[0], mr[1], mr[3], mr[4], item_to_monst, 0, 0, make_pygame_image(mr[7]), mr[8]))
+            monsters.append(Monster(mr[0], mr[1], mr[3], mr[4], item_to_monst, 0, 0, make_pygame_image(mr[7]), mr[8], mr[9]))
     return monsters
 
 def change_location(char, mmap, dx, dy, db):
@@ -66,6 +66,21 @@ def change_location(char, mmap, dx, dy, db):
 
     return False
 
+def leveling(char, exp, db):
+    t = pypika.Table('lvl_exp')
+    q = pypika.Query.from_(t).select('*').get_sql()
+    res = db.select(q)
+
+    char.exp += exp
+    for r in res:
+        if r[0] == char.lvl + 1 and r[1] <= char.exp:
+            char.lvl += 1
+            char.recalculate_basics()
+            # t = pypika.
+    t = pypika.Table('characters')
+    q = pypika.Query.update(t).set(t.lvl, char.lvl).set(t.curr_exp, char.exp).where(t.id == char.id).get_sql()
+    db.update(q)
+
 def move(char, mmap, dx, dy, db):
     if not mmap.is_ok_move(char, dx, dy):
         change_location(char, mmap, dx, dy, db)
@@ -90,6 +105,7 @@ def move(char, mmap, dx, dy, db):
             mmap.cells[index] = monst.item
             monst.item.x = monst.x
             monst.item.y = monst.y
+            leveling(char, monst.exp, db)
     else:
         char.x += dx
         char.y += dy
