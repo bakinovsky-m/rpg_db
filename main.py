@@ -20,7 +20,7 @@ CUR_ITEM = 0
 LOCATIONS = []
 CUR_LOCATION = None
 
-def change_location(char, mmap, dx, dy):
+def change_location(char, mmap, dx, dy, db):
     cur_x = char.curr_location.x
     cur_y = char.curr_location.y
 
@@ -38,13 +38,17 @@ def change_location(char, mmap, dx, dy):
                 char.y = 0
             elif dy < 0:
                 char.y = mmap.h - 1
+
+            t = pypika.Table('characters')
+            q = pypika.Query.update(t).set(t.curr_location, l.id).where(t.id == char.id).get_sql()
+            db.update(q)
             return True
 
     return False
 
-def move(char, mmap, dx, dy):
+def move(char, mmap, dx, dy, db):
     if not mmap.is_ok_move(char, dx, dy):
-        change_location(char, mmap, dx, dy)
+        change_location(char, mmap, dx, dy, db)
         return
     index = (char.x + dx) + (char.y + dy)*mmap.w
     mmmap = mmap.cells[index]
@@ -297,13 +301,13 @@ def main():
 
                 if not in_inventory_mode:
                     if e.key == pygame.K_UP:
-                        move(hero, mapp, 0, -1)
+                        move(hero, mapp, 0, -1, db)
                     if e.key == pygame.K_DOWN:
-                        move(hero, mapp, 0, 1)
+                        move(hero, mapp, 0, 1, db)
                     if e.key == pygame.K_LEFT:
-                        move(hero, mapp, -1, 0)
+                        move(hero, mapp, -1, 0, db)
                     if e.key == pygame.K_RIGHT:
-                        move(hero, mapp, 1, 0)
+                        move(hero, mapp, 1, 0, db)
 
                     hero.regenerate()
 
