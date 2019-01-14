@@ -239,7 +239,6 @@ def main():
     while hero_res == -1:
         hero_res = start_menu(db)
 
-    print(hero_res)
     # INVENTORY
     t = pypika.Table('inventories')
     q = pypika.Query.from_(t).select('*').where(t.id == hero_res[7]).get_sql()
@@ -305,9 +304,7 @@ def main():
                     running = False
                     break
                 if e.key == pygame.K_i:
-                    # print(hero.x, hero.y)
                     in_inventory_mode = not in_inventory_mode
-                    # break
 
                 if not in_inventory_mode:
                     if e.key == pygame.K_UP:
@@ -339,7 +336,6 @@ def main():
                                 mapp.cells[index] = 0
                     if e.key == pygame.K_d:
                         hero.drop_item(hero.inventory.items[CUR_ITEM])
-                        print(len(hero.inventory.items))
 
                 screen.fill(constants.BACKGROUND_COLOR)
                 for i, it in mapp:

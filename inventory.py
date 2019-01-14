@@ -18,12 +18,10 @@ class Inventory:
             r = self.db.select(q)
             # id name dmg hp  block asset
             r = r[0]
-            print(r[0], r[1], r[5], r[2], r[4], r[3])
             self.items.append(Item(r[0], r[1], r[5], r[2], r[4], r[3]))
 
 
     def add(self, item):
-        print('item', item)
         if self.size == self.capacity:
             return False
 
