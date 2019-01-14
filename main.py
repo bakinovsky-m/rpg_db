@@ -55,6 +55,16 @@ def move(char, mmap, dx, dy, db):
     if isinstance(mmmap, Monster):
         monst = mmmap
         char.curr_health -= monst.base_dmg - char.inventory.get_block()
+
+        # death
+        if char.curr_health <= 0:
+            q = '''DELETE FROM characters WHERE id=''' + str(char.id)
+            db.insert(q)
+            q = '''DELETE FROM items_in_inventory WHERE inv=''' + str(char.inventory.id)
+            db.insert(q)
+            q = '''DELETE FROM inventories WHERE id=''' + str(char.inventory.id)
+            db.insert(q)
+
         monst.health -= char.get_attack()
         if monst.health <= 0:
             mmap.cells[index] = monst.item
@@ -285,7 +295,7 @@ def main():
     pygame.display.update()
 
     running = True
-    while running:
+    while running and hero.curr_health > 0:
         clock.tick(FPS)
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
@@ -309,6 +319,8 @@ def main():
                     if e.key == pygame.K_RIGHT:
                         move(hero, mapp, 1, 0, db)
 
+                    if hero.curr_health <= 0:
+                        break
                     hero.regenerate()
 
                 else:
@@ -346,6 +358,8 @@ def main():
                 screen.blit(inventory_surf, (MAP_W,0))
                 draw_UI(screen, hero, in_inventory_mode)
                 pygame.display.update()
+    print('Your character is totally dead :(')
+    print('Make another one and good luck!')
 
 
 
