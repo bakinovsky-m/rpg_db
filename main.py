@@ -36,10 +36,6 @@ def move(char, mmap, dx, dy):
                 monst.item.x = monst.x
                 monst.item.y = monst.y
         elif isinstance(mmmap, Item):
-            if char.take_item(mmmap):
-                mmmap.x = -1
-                mmmap.y = -1
-                mmap.cells[index] = 0
             char.x += dx
             char.y += dy
 
@@ -285,6 +281,12 @@ def main():
                     if e.key == pygame.K_DOWN:
                         if CUR_ITEM < hero.inventory.size - 1:
                             CUR_ITEM += 1
+                    if e.key == pygame.K_g:
+                        index = hero.x + hero.y*mapp.w
+                        mmmap = mapp.cells[index]
+                        if isinstance(mmmap, Item):
+                            if hero.take_item(mmmap):
+                                mapp.cells[index] = 0
                     if e.key == pygame.K_d:
                         hero.drop_item(hero.inventory.items[CUR_ITEM])
                         print(len(hero.inventory.items))
