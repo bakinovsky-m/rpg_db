@@ -89,16 +89,6 @@ def move(char, mmap, dx, dy, db):
     mmmap = mmap.cells[index]
     if isinstance(mmmap, Monster):
         monst = mmmap
-        char.curr_health -= monst.base_dmg - char.inventory.get_block()
-
-        # death
-        if char.curr_health <= 0:
-            q = '''DELETE FROM characters WHERE id=''' + str(char.id)
-            db.insert(q)
-            q = '''DELETE FROM items_in_inventory WHERE inv=''' + str(char.inventory.id)
-            db.insert(q)
-            q = '''DELETE FROM inventories WHERE id=''' + str(char.inventory.id)
-            db.insert(q)
 
         monst.health -= char.get_attack()
         if monst.health <= 0:
@@ -106,6 +96,17 @@ def move(char, mmap, dx, dy, db):
             monst.item.x = monst.x
             monst.item.y = monst.y
             leveling(char, monst.exp, db)
+        else:
+            char.curr_health -= monst.base_dmg - char.inventory.get_block()
+
+            # death
+            if char.curr_health <= 0:
+                q = '''DELETE FROM characters WHERE id=''' + str(char.id)
+                db.insert(q)
+                q = '''DELETE FROM items_in_inventory WHERE inv=''' + str(char.inventory.id)
+                db.insert(q)
+                q = '''DELETE FROM inventories WHERE id=''' + str(char.inventory.id)
+                db.insert(q)
     else:
         char.x += dx
         char.y += dy
