@@ -134,6 +134,14 @@ def start_menu(db):
     if ans == 0:
         return -1
     if ans == 1:
+        t = pypika.Table('characters')
+        q = pypika.Query.from_(t).select('*').get_sql()
+        res = db.select(q)
+
+        print()
+        for r in res:
+            print(r[1] + ', lvl ' + str(r[2]))
+        print()
         hero_name = input('hero name: ')
         if hero_name == '0':
             return -1
