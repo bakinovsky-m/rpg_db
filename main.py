@@ -48,19 +48,14 @@ def move(char, mmap, dx, dy):
         return
     index = (char.x + dx) + (char.y + dy)*mmap.w
     mmmap = mmap.cells[index]
-    if mmmap != 0:
-        if isinstance(mmmap, Monster):
-            monst = mmmap
-            char.curr_health -= monst.base_dmg - char.inventory.get_block()
-            monst.health -= char.get_attack()
-            if monst.health <= 0:
-                mmap.cells[index] = monst.item
-                monst.item.x = monst.x
-                monst.item.y = monst.y
-        elif isinstance(mmmap, Item):
-            char.x += dx
-            char.y += dy
-
+    if isinstance(mmmap, Monster):
+        monst = mmmap
+        char.curr_health -= monst.base_dmg - char.inventory.get_block()
+        monst.health -= char.get_attack()
+        if monst.health <= 0:
+            mmap.cells[index] = monst.item
+            monst.item.x = monst.x
+            monst.item.y = monst.y
     else:
         char.x += dx
         char.y += dy
