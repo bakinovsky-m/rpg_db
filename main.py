@@ -126,6 +126,7 @@ def start_menu(db):
     print('1. Choose existing character')
     print('2. Create new character')
     print('3. List existing characters')
+    print('You always can input 0 to return to main menu')
     available_anses = [1,2,3]
     ans = input('> ')
     try:
@@ -135,8 +136,12 @@ def start_menu(db):
     except ValueError:
         return -1
 
+    if ans == 0:
+        return -1
     if ans == 1:
         hero_name = input('hero name: ')
+        if hero_name == '0':
+            return -1
         t = pypika.Table('characters')
         q = pypika.Query.from_(t).select('*').where(t.name == hero_name).get_sql()
         hero_res = db.select(q)
@@ -150,15 +155,19 @@ def start_menu(db):
     if ans == 2:
         print()
         name = input('Name: ')
+        if name == '0':
+            return -1
         print('Available classes: ')
         t = pypika.Table('classes')
         q = pypika.Query.from_(t).select('*').get_sql()
         class_res = db.select(q)
         i = 0
         for r in class_res:
-            print(i+1, r[1] + " (hp: " + str(r[2]) + ", dmg: " + str(r[3]) + ')') 
+            print(str(i+1) + '.', r[1] + " (hp: " + str(r[2]) + ", dmg: " + str(r[3]) + ')')
             i += 1
         class_ = input('No. of class: ')
+        if class_ == '0':
+            return -1
         class_ = int(class_)
         class_ -= 1 # for right indexation
 
