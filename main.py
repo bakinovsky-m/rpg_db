@@ -81,7 +81,7 @@ def draw_UI(screen, hero, in_inventory_mode):
     cur_item = 0
     for a in INV_BAR:
         screen.blit(a, (MAP_W, i * TEXT_SIZE))
-        if cur_item == CUR_ITEM:
+        if in_inventory_mode and cur_item == CUR_ITEM:
             surf = pygame.Surface((10, 10))
             surf.fill((255,0,0))
             screen.blit(surf, (DISPLAY_W - 10, i*TEXT_SIZE))
