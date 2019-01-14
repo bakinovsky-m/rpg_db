@@ -80,14 +80,15 @@ CREATE TABLE monsters (
     curr_location INT,
     item INT,
     asset varchar(100),
+    rarity INT,
     FOREIGN KEY (curr_location) REFERENCES locations(id),
     FOREIGN KEY (item) REFERENCES items(id)
 );
 
-INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset) values ('Rat', 1, 5, 2, 1, 1, 'assets/rat.png');
-INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset) values ('Wolf', 1, 7, 20, 1, 2, 'assets/wolf.png');
-INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset) values ('Draugr', 1, 10, 2, 1, 3, 'assets/rat.png');
-INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset) values ('Dragon', 1, 15, 3, 1, 4, 'assets/rat.png');
+INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset, rarity) values ('Rat', 1, 5, 2, 1, 1, 'assets/rat.png', 10);
+INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset, rarity) values ('Wolf', 1, 7, 20, 1, 2, 'assets/wolf.png', 20);
+INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset, rarity) values ('Draugr', 1, 10, 2, 1, 3, 'assets/rat.png', 50);
+INSERT INTO monsters(name, lvl, base_health, base_damage, curr_location, item, asset, rarity) values ('Dragon', 1, 15, 3, 1, 4, 'assets/rat.png', 100);
 
 CREATE TABLE items_in_inventory (
     inv int,

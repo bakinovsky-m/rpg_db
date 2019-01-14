@@ -20,6 +20,24 @@ CUR_ITEM = 0
 LOCATIONS = []
 CUR_LOCATION = None
 
+def create_monsters_list(db):
+    t = pypika.Table('monsters')
+    q = pypika.Query.from_(t).select('*').get_sql()
+    monster_res = db.select(q)
+    monsters = []
+    # id name lvl base_health base_damage curr_location item asset
+    for mr in monster_res:
+        t = pypika.Table('items')
+        q = pypika.Query.from_(t).select('*').where(t.id == mr[6]).get_sql()
+        rrr = db.select(q)[0]
+        rarity = mr[8]
+        monst_count = (1/rarity) * (MAP_W / TILE_SIZE) * (MAP_H / TILE_SIZE)
+        monst_count = round(monst_count)
+        for _ in range(monst_count):
+            item_to_monst = Item(rrr[0], rrr[1], make_pygame_image(rrr[5]), rrr[2], rrr[4], rrr[3])
+            monsters.append(Monster(mr[0], mr[1], mr[3], mr[4], item_to_monst, 0, 0, make_pygame_image(mr[7]), mr[8]))
+    return monsters
+
 def change_location(char, mmap, dx, dy, db):
     cur_x = char.curr_location.x
     cur_y = char.curr_location.y
@@ -42,6 +60,8 @@ def change_location(char, mmap, dx, dy, db):
             t = pypika.Table('characters')
             q = pypika.Query.update(t).set(t.curr_location, l.id).where(t.id == char.id).get_sql()
             db.update(q)
+
+            mmap.random_fill(create_monsters_list(db))
             return True
 
     return False
@@ -246,19 +266,6 @@ def main():
     inv_res = db.select(q)[0]
     heros_inv = Inventory(inv_res[0], inv_res[1], inv_res[2], db)
 
-    # MONSTERS
-    t = pypika.Table('monsters')
-    q = pypika.Query.from_(t).select('*').get_sql()
-    monster_res = db.select(q)
-    monsters = []
-    # id name lvl base_health base_damage curr_location item asset
-    for mr in monster_res:
-        t = pypika.Table('items')
-        q = pypika.Query.from_(t).select('*').where(t.id == mr[6]).get_sql()
-        rrr = db.select(q)[0]
-        item_to_monst = Item(rrr[0], rrr[1], make_pygame_image(rrr[5]), rrr[2], rrr[4], rrr[3])
-        monsters.append(Monster(mr[0], mr[1], mr[3], mr[4], item_to_monst, 0, 0, make_pygame_image(mr[7])))
-
     # LOCATIONS
     init_locations(db)
     for l in LOCATIONS:
@@ -274,7 +281,7 @@ def main():
     screen = pygame.display.set_mode([DISPLAY_W, DISPLAY_H], pygame.DOUBLEBUF)
 
     mapp = Map(MAP_W, MAP_H)
-    mapp.random_fill(monsters, 2)
+    mapp.random_fill(create_monsters_list(db))
 
     hero = Character(hero_res[0], hero_res[1], hero_res[2], hero_res[3], hero_res[4], hero_res[5], heros_inv, round(mapp.w/2), round(mapp.h/2), CUR_LOCATION, make_pygame_image("assets/new_hero.png"))
 

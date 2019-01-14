@@ -13,7 +13,9 @@ class Map:
         for _ in range(self.w * self.h):
             self.cells.append(0)
 
-    def random_fill(self, monsters, intensity):
+    def random_fill(self, monsters):
+        for n, c in enumerate(self.cells):
+            self.cells[n] = 0
         for m in monsters:
             rand_x = random.randint(0, self.w - 1)
             rand_y = random.randint(0, self.h - 1)

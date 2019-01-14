@@ -1,5 +1,5 @@
 class Monster:
-    def __init__(self, id, name, health, dmg, item, x, y, img):
+    def __init__(self, id, name, health, dmg, item, x, y, img, rarity):
         self.id = id
         self.name = name
         self.base_health = health
@@ -9,3 +9,4 @@ class Monster:
         self.y = y
         self.img = img
         self.health = health
+        self.rarity = rarity
