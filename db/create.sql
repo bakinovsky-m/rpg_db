@@ -53,6 +53,22 @@ CREATE TABLE classes (
 INSERT INTO classes (name, base_health, base_dmg, item) values ('Warrior', 20, 2, 2);
 INSERT INTO classes (name, base_health, base_dmg, item) values ('Archer', 15, 1, 4);
 INSERT INTO classes (name, base_health, base_dmg, item) values ('Rogue', 10, 3, 1);
+INSERT INTO classes (name, base_health, base_dmg, item) values ('Mage', 10, 1, 3);
+
+CREATE TABLE skills (
+    id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    name VARCHAR(100),
+    cost INT,
+    dmg INT,
+    on_self INT,
+    lvl_impr INT,
+    type VARCHAR(10),
+    duration INT,
+    asset VARCHAR(100)
+);
+
+INSERT INTO skills(name, cost, dmg, on_self, lvl_impr, type, duration, asset) values ('Fireball', 10, 10, 0, 5, 'dmg', 0, 'assets/fireball.png');
+INSERT INTO skills(name, cost, dmg, on_self, lvl_impr, type, duration, asset) values ('Healing hand', 10, 10, 1, 5, 'heal', 0, 'assets/healing_hand.png');
 
 CREATE TABLE characters (
     id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
@@ -64,6 +80,7 @@ CREATE TABLE characters (
     curr_location INT,
     inventory INT,
     class_ INT,
+    mana INT DEFAULT 10,
     FOREIGN KEY (curr_location) REFERENCES locations(id),
     FOREIGN KEY (inventory) REFERENCES inventories(id),
     FOREIGN KEY (class_) REFERENCES classes(id)
@@ -109,4 +126,11 @@ CREATE TABLE items_in_inventory (
     item int,
     FOREIGN KEY (inv) REFERENCES inventories(id),
     FOREIGN KEY (item) REFERENCES items(id)
+);
+
+CREATE TABLE skills_on_chars (
+    char_ INT,
+    skill INT,
+    FOREIGN KEY (char_) REFERENCES characters(id),
+    FOREIGN KEY (skill) REFERENCES skills(id)
 );

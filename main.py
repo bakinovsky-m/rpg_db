@@ -1,3 +1,4 @@
+import time
 import pygame
 import pypika
 from pypika import Order
@@ -9,6 +10,7 @@ from db_handler import DBHandler
 from item import Item
 from map import Map
 from location import Location
+from skill import Skill
 
 # from constants import DISPLAY_H, DISPLAY_W, BACKGROUND_COLOR, TILE_SIZE, FPS, MAP_H, MAP_W, INVENTORY_COLOR, TEXT_COLOR
 from constants import *
@@ -16,6 +18,7 @@ import constants
 
 INV_H = 0
 CUR_ITEM = 0
+CUR_SKILL = 0
 
 LOCATIONS = []
 CUR_LOCATION = None
@@ -76,7 +79,6 @@ def leveling(char, exp, db):
         if r[0] == char.lvl + 1 and r[1] <= char.exp:
             char.lvl += 1
             char.recalculate_basics()
-            # t = pypika.
     t = pypika.Table('characters')
     q = pypika.Query.update(t).set(t.lvl, char.lvl).set(t.curr_exp, char.exp).where(t.id == char.id).get_sql()
     db.update(q)
@@ -101,6 +103,8 @@ def move(char, mmap, dx, dy, db):
 
             # death
             if char.curr_health <= 0:
+                q = '''DELETE FROM skills_on_chars WHERE char_=''' + str(char.id)
+                db.insert(q)
                 q = '''DELETE FROM characters WHERE id=''' + str(char.id)
                 db.insert(q)
                 q = '''DELETE FROM items_in_inventory WHERE inv=''' + str(char.inventory.id)
@@ -111,15 +115,17 @@ def move(char, mmap, dx, dy, db):
         char.x += dx
         char.y += dy
 
-def draw_UI(screen, hero, in_inventory_mode):
+def draw_UI(screen, hero, in_inventory_mode, in_skills_mode, in_skill_direction_choosing_mode):
     f = pygame.font.SysFont('Noto Mono', TEXT_SIZE)
 
     INFO_BAR = []
 
-    INFO_BAR.append(f.render(hero.name + ", " + hero.curr_location.name, False, TEXT_COLOR))
+    INFO_BAR.append(f.render(hero.name + ", " + hero.class_ + ", " + hero.curr_location.name, False, TEXT_COLOR))
     s = 'lvl: ' + str(hero.lvl) + '  exp: ' + str(hero.exp)
     INFO_BAR.append(f.render(s, False, TEXT_COLOR))
     s = 'hp: ' + str(hero.curr_health) + '/' + str(hero.get_total_health()) + '(+' + str(hero.inventory.get_health()) + ')' + ' reg:' + str(hero.regeneration)
+    INFO_BAR.append(f.render(s, False, TEXT_COLOR))
+    s = 'mana: ' + str(hero.curr_mana) + '/' + str(hero.total_mana)
     INFO_BAR.append(f.render(s, False, TEXT_COLOR))
     s = 'dmg: ' + str(hero.base_dmg) + '(+' + str(hero.inventory.get_attack()) + ')'
     INFO_BAR.append(f.render(s, False, TEXT_COLOR))
@@ -155,6 +161,25 @@ def draw_UI(screen, hero, in_inventory_mode):
             screen.blit(surf, (DISPLAY_W - 10, i*TEXT_SIZE))
         i += 1
         cur_item += 1
+
+    skills_bar = []
+    cur_skill = 0
+    for sk in hero.skills:
+        skills_bar.append(f.render(sk.name, False, TEXT_COLOR))
+    i = 0
+    for sk in skills_bar:
+        screen.blit(sk, (MAP_W, i * TEXT_SIZE + DISPLAY_H/2))
+        if cur_skill == CUR_SKILL:
+            if in_skills_mode:
+                surf = pygame.Surface((10, 10))
+                surf.fill((255,0,0))
+                screen.blit(surf, (DISPLAY_W - 10, i*TEXT_SIZE + DISPLAY_H/2))
+            elif in_skill_direction_choosing_mode:
+                surf = pygame.Surface((DISPLAY_W - MAP_W, TEXT_SIZE), pygame.SRCALPHA)
+                surf.fill((255, 0, 0, 100))
+                screen.blit(surf, (MAP_W, i*TEXT_SIZE + DISPLAY_H/2))
+        i += 1
+        cur_skill += 1
 
 def init_locations(db_handler):
     t = pypika.Table('locations')
@@ -204,6 +229,13 @@ def start_menu(db):
         except IndexError:
             print('no such character')
             return -1
+
+        t = pypika.Table('classes')
+        q = pypika.Query.from_(t).select('name').where(t.id == hero_res[8]).get_sql()
+        class_res = db.select(q)
+        hero_res = list(hero_res)
+        hero_res.append(class_res[0][0])
+
         print('starting your adventure')
         return hero_res
     if ans == 2:
@@ -250,8 +282,27 @@ def start_menu(db):
             ).get_sql()
         db.insert(q)
 
+
         q = pypika.Query.from_(t).select("*").where(t.name == name).get_sql()
         res = db.select(q)[0]
+
+        if class_res[class_][1] == 'Mage':
+            t = pypika.Table('skills_on_chars')
+            q = pypika.Query.into(t).columns(
+                    t.char_,
+                    t.skill
+                ).insert(
+                    res[0],
+                    1
+                ).insert(
+                    res[0],
+                    2
+                ).get_sql()
+            db.insert(q)
+
+        res = list(res)
+        res.append(class_res[class_][1])
+
         print('new character have been created')
         return res
 
@@ -265,6 +316,42 @@ def start_menu(db):
             print(r[1] + ', lvl ' + str(r[2]))
         print()
         return -1
+
+def set_skills_to_hero(hero, db):
+    t = pypika.Table('skills_on_chars')
+    q = pypika.Query.from_(t).select('*').where(t.char_ == hero.id).get_sql()
+    q = '''SELECT s.id, s.name, s.cost, s.dmg, s.on_self, s.lvl_impr, s.type, s.duration, s.asset FROM skills as s JOIN skills_on_chars as skc on s.id = skc.skill WHERE skc.char_=''' + str(hero.id)
+    res = db.select(q)
+
+    for r in res:
+        hero.skills.append(Skill(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], make_pygame_image(r[8])))
+
+def skill_animation(char, target_x, target_y, screen):
+    skill = char.skills[CUR_SKILL]
+    if skill.type == 'heal':
+        screen.blit(skill.img, (target_x * TILE_SIZE, target_y * TILE_SIZE))
+        pygame.display.update()
+        time.sleep(1)
+        return
+    sk_x = char.x
+    sk_y = char.y
+    dif_x = char.x - target_x
+    dif_y = char.y - target_y
+    while sk_x != target_x or sk_y != target_y:
+        screen.blit(skill.img, (sk_x * TILE_SIZE, sk_y * TILE_SIZE))
+        if dif_x != 0:
+            sk_x -= dif_x/abs(dif_x)
+        if dif_y != 0:
+            sk_y -= dif_y/abs(dif_y)
+        dif_x = sk_x - target_x
+        dif_y = sk_y - target_y
+    if dif_x != 0:
+        sk_x -= dif_x/abs(dif_x)
+    if dif_y != 0:
+        sk_y -= dif_y/abs(dif_y)
+    screen.blit(skill.img, (sk_x * TILE_SIZE, sk_y * TILE_SIZE))
+    pygame.display.update()
+    time.sleep(1)
 
 def main():
     # INIT
@@ -300,21 +387,39 @@ def main():
     mapp = Map(MAP_W, MAP_H)
     mapp.random_fill(create_monsters_list(db))
 
-    hero = Character(hero_res[0], hero_res[1], hero_res[2], hero_res[3], hero_res[4], hero_res[5], heros_inv, round(mapp.w/2), round(mapp.h/2), CUR_LOCATION, make_pygame_image("assets/new_hero.png"))
+    hero = Character(hero_res[0], hero_res[1], hero_res[2], hero_res[3], hero_res[4], hero_res[5], heros_inv, round(mapp.w/2), round(mapp.h/2), CUR_LOCATION, make_pygame_image("assets/new_hero.png"), hero_res[-1], hero_res[-2])
+    set_skills_to_hero(hero, db)
 
     constants.BACKGROUND_COLOR = hero.curr_location.rgb
 
-    inventory_surf = pygame.Surface((DISPLAY_W - MAP_W, DISPLAY_H))
+    inventory_surf = pygame.Surface((DISPLAY_W - MAP_W, DISPLAY_H/2))
     inventory_surf.fill(INVENTORY_COLOR)
+    skills_surf = pygame.Surface((DISPLAY_W - MAP_W, DISPLAY_H/2))
+    skills_surf.fill(SKILLS_COLOR)
 
     in_inventory_mode = False
+    in_skills_mode = False
+    in_skill_direction_choosing_mode = False
+    target_is_found = False
+    target = None
     screen.fill(constants.BACKGROUND_COLOR)
     for i, it in mapp:
         if it != 0:
             screen.blit(it.img, (it.x * TILE_SIZE, it.y * TILE_SIZE))
+            if isinstance(it, Monster):
+                health_bar = pygame.Surface((TILE_SIZE * (it.health / it.base_health), int(TILE_SIZE/10)))
+                health_bar.fill(hex_to_rgb('#00FF00'))
+                screen.blit(health_bar, (it.x * TILE_SIZE, (it.y * TILE_SIZE)))
+    health_bar = pygame.Surface((TILE_SIZE * (hero.curr_health / hero.get_total_health()), int(TILE_SIZE/10)))
+    health_bar.fill(hex_to_rgb('#00FF00'))
+    screen.blit(health_bar, (hero.x * TILE_SIZE, (hero.y *TILE_SIZE) - 15))
+    mana_bar = pygame.Surface((TILE_SIZE * (hero.curr_mana / hero.total_mana), int(TILE_SIZE/10)))
+    mana_bar.fill(hex_to_rgb('#0000FF'))
+    screen.blit(mana_bar, (hero.x * TILE_SIZE, (hero.y *TILE_SIZE) - 10))
     screen.blit(hero.img, (hero.x * TILE_SIZE, hero.y * TILE_SIZE))
     screen.blit(inventory_surf, (MAP_W,0))
-    draw_UI(screen, hero, in_inventory_mode)
+    screen.blit(skills_surf, (MAP_W, DISPLAY_H/2))
+    draw_UI(screen, hero, in_inventory_mode, in_skills_mode, in_skill_direction_choosing_mode)
     pygame.display.update()
 
     running = True
@@ -324,28 +429,23 @@ def main():
             if e.type == pygame.QUIT:
                 running = False
             if e.type == pygame.KEYDOWN:
+                global CUR_ITEM
+                global CUR_SKILL
                 if e.key == pygame.K_ESCAPE:
                     running = False
                     break
                 if e.key == pygame.K_i:
+                    if not in_inventory_mode:
+                        in_skills_mode = False
                     in_inventory_mode = not in_inventory_mode
+                    CUR_ITEM = 0
+                if e.key == pygame.K_s:
+                    if not in_skills_mode:
+                        in_inventory_mode = False
+                    in_skills_mode = not in_skills_mode
+                    CUR_SKILL = 0
 
-                if not in_inventory_mode:
-                    if e.key == pygame.K_UP:
-                        move(hero, mapp, 0, -1, db)
-                    if e.key == pygame.K_DOWN:
-                        move(hero, mapp, 0, 1, db)
-                    if e.key == pygame.K_LEFT:
-                        move(hero, mapp, -1, 0, db)
-                    if e.key == pygame.K_RIGHT:
-                        move(hero, mapp, 1, 0, db)
-
-                    if hero.curr_health <= 0:
-                        break
-                    hero.regenerate()
-
-                else:
-                    global CUR_ITEM
+                if in_inventory_mode:
                     if e.key == pygame.K_UP:
                         if CUR_ITEM != 0:
                             CUR_ITEM -= 1
@@ -361,6 +461,86 @@ def main():
                     if e.key == pygame.K_d:
                         hero.drop_item(hero.inventory.items[CUR_ITEM])
 
+                elif in_skills_mode:
+                    if e.key == pygame.K_UP:
+                        if CUR_SKILL != 0:
+                            CUR_SKILL -= 1
+                    if e.key == pygame.K_DOWN:
+                        if CUR_SKILL < len(hero.skills) - 1:
+                            CUR_SKILL += 1
+                    if e.key == pygame.K_RETURN:
+                        skill = hero.skills[CUR_SKILL]
+                        if skill.cost > hero.curr_mana:
+                            break
+                        if skill.type == 'heal':
+                            skill.use_on_target(hero)
+                            skill_animation(hero, hero.x, hero.y, screen)
+                            hero.curr_mana -= skill.cost
+                            in_skills_mode = False
+                        if skill.type == 'dmg':
+                            in_skill_direction_choosing_mode = True
+                            in_skills_mode = False
+
+                elif in_skill_direction_choosing_mode:
+                    if e.key == pygame.K_UP:
+                        ind = hero.x + hero.y * mapp.w
+                        while ind >= 0:
+                            if isinstance(mapp.cells[ind], Monster):
+                                target_is_found = True
+                                target = mapp.cells[ind]
+                                break
+                            ind -= mapp.w
+                    if e.key == pygame.K_DOWN:
+                        ind = hero.x + hero.y * mapp.w
+                        while ind <= mapp.h*mapp.w:
+                            if isinstance(mapp.cells[ind], Monster):
+                                target_is_found = True
+                                target = mapp.cells[ind]
+                                break
+                            ind += mapp.w
+                    if e.key == pygame.K_LEFT:
+                        ind = hero.x + hero.y * mapp.w
+                        while ind >= hero.y*mapp.w:
+                            if isinstance(mapp.cells[ind], Monster):
+                                target_is_found = True
+                                target = mapp.cells[ind]
+                                break
+                            ind -= 1
+                    if e.key == pygame.K_RIGHT:
+                        ind = hero.x + hero.y * mapp.w
+                        while ind <= hero.y*mapp.w + mapp.w:
+                            if isinstance(mapp.cells[ind], Monster):
+                                target_is_found = True
+                                target = mapp.cells[ind]
+                                break
+                            ind += 1
+                    if target_is_found:
+                        hero.curr_mana -= skill.cost
+                        skill_animation(hero, target.x, target.y, screen)
+                        hero.skills[CUR_SKILL].use_on_target(target)
+                        if target.health <= 0:
+                            mapp.cells[target.x + target.y*mapp.w] = target.item
+                            target.item.x = target.x
+                            target.item.y = target.y
+                            leveling(hero, target.exp, db)
+                        target_is_found = False
+                        target = None
+                    in_skill_direction_choosing_mode = False
+                else:
+                    if e.key == pygame.K_UP:
+                        move(hero, mapp, 0, -1, db)
+                    if e.key == pygame.K_DOWN:
+                        move(hero, mapp, 0, 1, db)
+                    if e.key == pygame.K_LEFT:
+                        move(hero, mapp, -1, 0, db)
+                    if e.key == pygame.K_RIGHT:
+                        move(hero, mapp, 1, 0, db)
+
+                    if hero.curr_health <= 0:
+                        break
+                    hero.regenerate()
+
+
                 screen.fill(constants.BACKGROUND_COLOR)
                 for i, it in mapp:
                     if it != 0:
@@ -372,11 +552,15 @@ def main():
 
                 health_bar = pygame.Surface((TILE_SIZE * (hero.curr_health / hero.get_total_health()), int(TILE_SIZE/10)))
                 health_bar.fill(hex_to_rgb('#00FF00'))
-                screen.blit(health_bar, (hero.x * TILE_SIZE, (hero.y *TILE_SIZE) - 10))
+                screen.blit(health_bar, (hero.x * TILE_SIZE, (hero.y *TILE_SIZE) - 15))
+                mana_bar = pygame.Surface((TILE_SIZE * (hero.curr_mana / hero.total_mana), int(TILE_SIZE/10)))
+                mana_bar.fill(hex_to_rgb('#0000FF'))
+                screen.blit(mana_bar, (hero.x * TILE_SIZE, (hero.y *TILE_SIZE) - 10))
                 screen.blit(hero.img, (hero.x * TILE_SIZE, hero.y * TILE_SIZE))
 
                 screen.blit(inventory_surf, (MAP_W,0))
-                draw_UI(screen, hero, in_inventory_mode)
+                screen.blit(skills_surf, (MAP_W, DISPLAY_H/2))
+                draw_UI(screen, hero, in_inventory_mode, in_skills_mode, in_skill_direction_choosing_mode)
                 pygame.display.update()
     if hero.curr_health <= 0:
         print('Your character is totally dead :(')
