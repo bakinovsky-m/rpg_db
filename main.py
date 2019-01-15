@@ -165,7 +165,7 @@ def draw_UI(screen, hero, in_inventory_mode, in_skills_mode, in_skill_direction_
     skills_bar = []
     cur_skill = 0
     for sk in hero.skills:
-        skills_bar.append(f.render(sk.name, False, TEXT_COLOR))
+        skills_bar.append(f.render(sk.name + ' (' + str(sk.cost) + ')', False, TEXT_COLOR))
     i = 0
     for sk in skills_bar:
         screen.blit(sk, (MAP_W, i * TEXT_SIZE + DISPLAY_H/2))
