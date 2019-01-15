@@ -490,7 +490,7 @@ def main():
                                 target = mapp.cells[ind]
                                 break
                             ind -= mapp.w
-                    if e.key == pygame.K_DOWN:
+                    elif e.key == pygame.K_DOWN:
                         ind = hero.x + hero.y * mapp.w
                         while ind <= mapp.h*mapp.w:
                             if isinstance(mapp.cells[ind], Monster):
@@ -498,7 +498,7 @@ def main():
                                 target = mapp.cells[ind]
                                 break
                             ind += mapp.w
-                    if e.key == pygame.K_LEFT:
+                    elif e.key == pygame.K_LEFT:
                         ind = hero.x + hero.y * mapp.w
                         while ind >= hero.y*mapp.w:
                             if isinstance(mapp.cells[ind], Monster):
@@ -506,7 +506,7 @@ def main():
                                 target = mapp.cells[ind]
                                 break
                             ind -= 1
-                    if e.key == pygame.K_RIGHT:
+                    elif e.key == pygame.K_RIGHT:
                         ind = hero.x + hero.y * mapp.w
                         while ind <= hero.y*mapp.w + mapp.w:
                             if isinstance(mapp.cells[ind], Monster):
@@ -514,6 +514,10 @@ def main():
                                 target = mapp.cells[ind]
                                 break
                             ind += 1
+                    else:
+                        target_is_found = False
+                        target = None
+                        in_skill_direction_choosing_mode = False
                     if target_is_found:
                         hero.curr_mana -= skill.cost
                         skill_animation(hero, target.x, target.y, screen)
